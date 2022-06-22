@@ -9,9 +9,21 @@ using System;
 
 namespace Pong
 {
+    public class SpriteData
+    {
+        public readonly SpriteBatch batch;
+        public readonly Game game;
+
+        public SpriteData(SpriteBatch batch, Game game)
+        {
+            this.batch = batch;
+            this.game = game;
+        }
+    }
+
     public class Sprite
     {
-        readonly SpriteBatch batch;
+        readonly SpriteData data;
 
         readonly Texture2D texture;
         readonly Vector2 origin;
@@ -23,17 +35,17 @@ namespace Pong
         int rotation = 0;
         float scale;
 
-        public Sprite(Game game,SpriteBatch batch, string texture, Vector2 origin, float scale)
+        public Sprite(SpriteData spriteInfo, string texture, Vector2 origin, float scale)
         {
-            this.batch = batch;
-            this.texture = game.Content.Load<Texture2D>(texture);
+            this.data = spriteInfo;
+            this.texture = spriteInfo.game.Content.Load<Texture2D>(texture);
             this.origin = origin;
             this.scale = scale;
         }
 
         public void Draw()
         {
-            batch.Draw(texture, position, null, tint, rotation, origin,scale, effects, 0);
+            data.batch.Draw(texture, position, null, tint, rotation, origin,scale, effects, 0);
         }
 
         public void SetPosition(Vector2 position)

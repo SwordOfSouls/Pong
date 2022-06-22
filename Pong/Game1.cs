@@ -8,6 +8,7 @@ namespace Pong
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
+        private SpriteData spriteData;
 
         private Sprite ball;
 
@@ -28,8 +29,9 @@ namespace Pong
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            spriteData = new SpriteData(spriteBatch, this);
 
-            ball = new Sprite(this,spriteBatch, "ball", new Vector2(75, 75),.4f);
+            ball = new Sprite(spriteData, "ball", new Vector2(75, 75), 0.4f);
         }
 
         protected override void Update(GameTime gameTime)
