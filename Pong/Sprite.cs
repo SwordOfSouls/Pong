@@ -9,18 +9,6 @@ using System;
 
 namespace Pong
 {
-    public class SpriteData
-    {
-        public readonly SpriteBatch batch;
-        public readonly Game game;
-
-        public SpriteData(SpriteBatch batch, Game game)
-        {
-            this.batch = batch;
-            this.game = game;
-        }
-    }
-
     public class Sprite
     {
         readonly SpriteData data;
@@ -28,7 +16,7 @@ namespace Pong
         readonly Texture2D texture;
         readonly Vector2 origin;
 
-        Vector2 position = new Vector2(0,0);
+        Vector2 position = new Vector2(0, 0);
         Color tint = Color.White;
         SpriteEffects effects = SpriteEffects.None;
 
@@ -45,7 +33,7 @@ namespace Pong
 
         public void Draw()
         {
-            data.batch.Draw(texture, position, null, tint, rotation, origin,scale, effects, 0);
+            data.batch.Draw(texture, position, null, tint, rotation, origin, scale, effects, 0);
         }
 
         public void SetPosition(Vector2 position)
@@ -72,5 +60,19 @@ namespace Pong
         {
             this.scale = scale;
         }
+
     }
+
+    public class SpriteData
+    {
+        public readonly SpriteBatch batch;
+        public readonly Game game;
+
+        public SpriteData(SpriteBatch batch, Game game)
+        {
+            this.batch = batch;
+            this.game = game;
+        }
+    }
+
 }
