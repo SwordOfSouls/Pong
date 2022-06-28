@@ -38,8 +38,8 @@ namespace SwordOfSouls.Games.Api
 
             data.batch.Draw(frame.texture, frame.position, frame.textureLocation, frame.tint,
                 frame._rotation,
-                new Vector2((frame.origin.X - frame.textureLocation.Value.Left),
-                (frame.origin.Y - frame.textureLocation.Value.Top)),
+                new Vector2(frame.origin.X - frame.textureLocation.Value.Left,
+                frame.origin.Y - frame.textureLocation.Value.Top),
                 frame.scale,
                 frame.effects,
                 0f);
@@ -66,6 +66,7 @@ namespace SwordOfSouls.Games.Api
                 }
                 elapsedTime = TimeSpan.Zero;
             }
+            rotation++;
         }
 
         public virtual void Frame(GameTime gameTime)
@@ -81,6 +82,12 @@ namespace SwordOfSouls.Games.Api
 
         public GameSprite(SpriteData spriteData, string texture, Rectangle? textureLocation, Vector2 origin, Vector2 velocity, float scale)
             : base(spriteData,texture, textureLocation, origin, scale)
+        {
+            this.velocity = velocity;
+        }
+        
+        public GameSprite(SpriteData spriteData, Texture2D texture, Rectangle? textureLocation, Vector2 origin, Vector2 velocity, float scale)
+            : base(spriteData, texture, textureLocation, origin, scale)
         {
             this.velocity = velocity;
         }
@@ -131,6 +138,7 @@ namespace SwordOfSouls.Games.Api
         public SpriteEffects effects = SpriteEffects.None;
 
         public bool debug = false;
+        public bool draw = true;
         public float scale;
         public float _rotation = 0;
         public float rotation
@@ -163,25 +171,51 @@ namespace SwordOfSouls.Games.Api
             this.scale = scale;
 
             this.hitbox = new Hitbox(this);
-            Game1.sprites.Add(this);
+            data.sprites.Add(this);
         }
+
+        public Sprite(SpriteData spriteData, Texture2D texture, Rectangle? textureLocation, Vector2 origin, float scale)
+        {
+
+            this.data = spriteData;
+            this.texture = texture;
+            if (textureLocation.HasValue)
+            {
+                Rectangle textureLocT = (Rectangle)textureLocation;
+                this.textureLocation = new Rectangle(textureLocT.X, textureLocT.Height, textureLocT.Width + 1 - textureLocT.X, textureLocT.Y - textureLocT.Height);
+                Debug.WriteLine(textureLocation);
+            }
+            else
+            {
+                this.textureLocation = textureLocation;
+            }
+            this.origin = origin;
+            this.scale = scale;
+
+            this.hitbox = new Hitbox(this);
+            data.sprites.Add(this);
+        }
+
 
         public virtual void Draw()
         {
-            if(textureLocation.HasValue)
+            if (draw)
             {
-                data.batch.Draw(texture, position, textureLocation, tint, _rotation, new Vector2(origin.X - textureLocation.Value.Left, origin.Y - textureLocation.Value.Top), scale, effects, 1);
-            } else
-            {
-                data.batch.Draw(texture, position, textureLocation, tint, _rotation, origin, scale, effects, 1);
+                if (textureLocation.HasValue)
+                {
+                    data.batch.Draw(texture, position, textureLocation, tint, _rotation, new Vector2(origin.X - textureLocation.Value.Left, origin.Y - textureLocation.Value.Top), scale, effects, 1);
+                }
+                else
+                {
+                    data.batch.Draw(texture, position, textureLocation, tint, _rotation, origin, scale, effects, 1);
+                }
+
+
+                if (debug)
+                {
+                    hitbox.DrawHitbox();
+                }
             }
-
-
-            if (debug)
-            {
-                hitbox.DrawHitbox();
-            }
-
         }
 
         public virtual void Update(GameTime gameTime) { }
@@ -192,6 +226,8 @@ namespace SwordOfSouls.Games.Api
     {
         public readonly SpriteBatch batch;
         public readonly Game game;
+        public List<Sprite> sprites = new List<Sprite>();
+
 
         public SpriteData(SpriteBatch batch, Game game)
         {

@@ -17,6 +17,8 @@ namespace SwordOfSouls.Games.Api
         readonly Sprite sprite;
         readonly Rectangle localHitbox;
         readonly Texture2D texture;
+        public Rectangle boundingBox;
+        private Color boundingColor = Color.Red;
         Vector2[] corners = new Vector2[4];
 
 
@@ -24,62 +26,84 @@ namespace SwordOfSouls.Games.Api
         {
             this.sprite = sprite;
             this.localHitbox = GetLocalHitbox();
-            //texture = new Texture2D(sprite.data.game.GraphicsDevice, 4, 4);
-            //texture.SetData(new[] {Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White});
-            texture = new Texture2D(sprite.data.game.GraphicsDevice, 1, 1);
-            texture.SetData(new[] { Color.White } );
-            //Debug.WriteLine(localHitbox);
+            texture = new Texture2D(sprite.data.game.GraphicsDevice, 4, 4);
+            texture.SetData(new[] {Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White});
+            //texture = new Texture2D(sprite.data.game.GraphicsDevice, 1, 1);
+            //texture.SetData(new[] { Color.White } );
+            //Debug.WriteLine(localHitbox
+            boundingColor.A = (byte).5;
         }
 
-        public Rectangle GetHitbox()
+        public void UpdateHitbox()
         {
-            Rectangle hitbox = new Rectangle(0, 0, 0, 0);
+            int xTemp = 0;
+            int yTemp = 0;
             if (sprite.textureLocation.HasValue)
             {
-                hitbox = new Rectangle((int)(sprite.position.X - ((sprite.origin.X - sprite.textureLocation.Value.Left) * sprite.scale)),
-                                        (int)(sprite.position.Y - ((sprite.origin.Y - sprite.textureLocation.Value.Top)) * sprite.scale),
-                                        (int)(localHitbox.Width * sprite.scale),
-                                        (int)(localHitbox.Height * sprite.scale));
+                xTemp = sprite.textureLocation.Value.Left;
+                yTemp = sprite.textureLocation.Value.Top;
             }
-            else
+            Rectangle hitbox = new Rectangle((int)(sprite.position.X - (sprite.origin.X - xTemp) * sprite.scale),
+                            (int)(sprite.position.Y - (sprite.origin.Y - yTemp) * sprite.scale),
+                            (int)(localHitbox.Width * sprite.scale),
+                            (int)(localHitbox.Height * sprite.scale));
+
+            Vector2 offset = new Vector2(sprite.position.X, sprite.position.Y);
+            Vector2[] hitboxCorners = new Vector2[]
             {
-                hitbox = new Rectangle((int)(sprite.position.X - (sprite.origin.X * sprite.scale)),
-                                (int)(sprite.position.Y - sprite.origin.Y * sprite.scale),
-                                (int)(localHitbox.Width * sprite.scale),
-                                (int)(localHitbox.Height * sprite.scale));
-            }
+                new Vector2(hitbox.Left, hitbox.Top) - offset,
+                new Vector2(hitbox.Right, hitbox.Top) - offset,
+                new Vector2(hitbox.Left, hitbox.Bottom) - offset,
+                new Vector2(hitbox.Right, hitbox.Bottom) - offset,
+            };
 
-
-            Vector2[] hitboxCorners = new Vector2[4];
-            Vector2 offset = new Vector2(hitbox.X + hitbox.Width / 2, hitbox.Y + hitbox.Height / 2);
-            hitboxCorners[0] = new Vector2(hitbox.Left, hitbox.Top) - offset;
-            hitboxCorners[1] = new Vector2(hitbox.Right, hitbox.Top) - offset;
-            hitboxCorners[2] = new Vector2(hitbox.Left, hitbox.Bottom) - offset;
-            hitboxCorners[3] = new Vector2(hitbox.Right, hitbox.Bottom) - offset;
-
-            float cos_rot = (float)Math.Cos(sprite._rotation);
-            float sin_rot = (float)Math.Sin(sprite._rotation);
-
-            for (int i = 0; i < hitboxCorners.Length; i++)
+            //if (Math.Abs(sprite.rotation) > 1e-10)
             {
-                corners[i].X = hitboxCorners[i].X * cos_rot - hitboxCorners[i].Y * sin_rot;
-                corners[i].Y = hitboxCorners[i].X * sin_rot + hitboxCorners[i].Y * cos_rot;
-                corners[i] += offset;
+                float cos_rot = (float)Math.Cos(sprite._rotation);
+                float sin_rot = (float)Math.Sin(sprite._rotation);
+
+                for (int i = 0; i < hitboxCorners.Length; i++)
+                {
+                    corners[i].X = hitboxCorners[i].X * cos_rot - hitboxCorners[i].Y * sin_rot;
+                    corners[i].Y = hitboxCorners[i].X * sin_rot + hitboxCorners[i].Y * cos_rot;
+
+                    corners[i] += offset;
+                }
             }
-            return hitbox;
+
+            int bbxMin = (int) Math.Min(Math.Min(corners[0].X,corners[1].X), Math.Min(corners[2].X, corners[3].X));
+            int bbyMin = (int) Math.Min(Math.Min(corners[0].Y,corners[1].Y), Math.Min(corners[2].Y, corners[3].Y));
+            int bbxMax = (int) Math.Max(Math.Max(corners[0].X,corners[1].X), Math.Max(corners[2].X, corners[3].X));
+            int bbyMax = (int) Math.Max(Math.Max(corners[0].Y,corners[1].Y), Math.Max(corners[2].Y, corners[3].Y));
+
+            boundingBox = new Rectangle(bbxMin, bbyMin, bbxMax + 1 - bbxMin, bbyMax - bbyMin);
+        }
+
+        public bool IsColliding(Sprite sprite)
+        {
+            UpdateHitbox();
+            sprite.hitbox.UpdateHitbox();
+
+            //If bounding boxes don't overlap
+            //if(xmax1 >= xmin2 and xmax2 >= xmin1)
+            if (!((boundingBox.Right >= sprite.hitbox.boundingBox.Left) && (sprite.hitbox.boundingBox.Right >= boundingBox.Left) &&
+                (boundingBox.Bottom >= sprite.hitbox.boundingBox.Top) && (sprite.hitbox.boundingBox.Bottom >= boundingBox.Top)))
+            {
+                //Bounding boxes don't collide
+                return false;
+            }
+            return true;
         }
 
         public void DrawHitbox()
         {
-            Color red = Color.DarkRed;
-            red.A = (byte).5;
-            //sprite.data.batch.Draw(texture, GetHitbox(), red);
-            GetHitbox();
+            UpdateHitbox();
+            sprite.data.batch.Draw(texture, boundingBox, boundingColor);
             foreach (Vector2 cornor in corners)
             {
+                
                 sprite.data.batch.Draw(texture, cornor, Color.Yellow);
             }
-
             sprite.data.batch.Draw(texture, sprite.position, Color.Yellow);
         }
 
