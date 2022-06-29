@@ -20,11 +20,11 @@ namespace Pong
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Up) && hitbox.boundingBox.Top >= 0)
             {
-                position += new Vector2(0, -5);
+                position += new Vector2(0, -10f);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Down) && hitbox.boundingBox.Bottom <= data.game.GraphicsDevice.Viewport.Height)
             {
-                position += new Vector2(0, 5);
+                position += new Vector2(0, 10f);
             }
 
 

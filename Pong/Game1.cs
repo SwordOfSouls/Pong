@@ -44,26 +44,6 @@ namespace Pong
             spriteData = new SpriteData(spriteBatch, this);
 
             ball = new Ball(spriteData, new Paddle(spriteData, Paddle.createPaddle(spriteData), 0), new Paddle(spriteData, Paddle.createPaddle(spriteData), GraphicsDevice.Viewport.Width));
-
-            //ball.debug = true;
-
-            //ball = new GameSprite(spriteData, "ball", null, new Vector2(75, 75), new Vector2(0, 0), .4f);
-            //ball.position = (new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 1.5f));
-            //ball.rotation = 45;
-            //ball.debug = true;
-
-
-            //cat = new AnimatedSprite(spriteData, "cat", new Rectangle(7, 41, 36, 20),new Vector2(22,31),new Vector2(0,0),3);
-            //cat.position = (new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2));
-            //cat.rotation = 45;
-
-            //cat.AddFrame(new Frame(cat, new Vector2(72, 31), new Rectangle(56, 41, 88, 22)));
-            //cat.AddFrame(new Frame(cat, new Vector2(122, 31), new Rectangle(107, 41, 136, 20)));
-            //cat.AddFrame(new Frame(cat, new Vector2(172, 31), new Rectangle(156, 41, 196, 6)));
-
-            //cat.frameTime = TimeSpan.FromMilliseconds(300);
-
-            //cat.debug = true;
         }
 
         protected override void Update(GameTime gameTime)
@@ -81,6 +61,9 @@ namespace Pong
                 sprite.Update(gameTime);
 
             }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.R))
+                ball.Reset();
 
             base.Update(gameTime);
         }

@@ -24,6 +24,15 @@ namespace Pong
             tint = Color.Cyan;
         }
 
+        public void Reset()
+        {
+            position = new Vector2(data.game.GraphicsDevice.Viewport.Width / 2, data.game.GraphicsDevice.Viewport.Height / 2);
+            velocity = new Vector2(7, 7);
+            this.draw = true;
+            this.padd1.draw = true;
+            this.padd2.draw = true;
+        }
+
         public override void Update(GameTime gameTime)
         {
             GraphicsDevice GraphicsDevice = data.game.GraphicsDevice;
@@ -31,7 +40,7 @@ namespace Pong
             if (hitbox.IsColliding(padd1) || hitbox.IsColliding(padd2))
             {
                 tint = new Color(rand.Next(255), rand.Next(255), rand.Next(255));
-                velocity = new Vector2(velocity.X * -1, velocity.Y * -1);
+                velocity = new Vector2(velocity.X * -1, velocity.Y);
             } else if (hitbox.boundingBox.Right >= GraphicsDevice.Viewport.Width || hitbox.boundingBox.Left <= 0)
             {
                 velocity = Vector2.Zero;
