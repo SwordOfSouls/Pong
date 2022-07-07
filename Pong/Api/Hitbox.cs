@@ -92,8 +92,43 @@ namespace SwordOfSouls.Games.Api
                 //Bounding boxes don't collide
                 return false;
             }
-            return true;
+
+            //https://stackoverflow.com/questions/3838329/how-can-i-check-if-two-segments-intersect#9997374
+            for (int i = 0; i < corners.Length; i++)
+            {
+                for (int j = 0; j < corners.Length; j++)
+                {
+                    float Y1 = corners[i].Y;
+                    float Y2 = corners[(i + 1) % corners.Length].Y;
+                    float Y3 = sprite.hitbox.corners[j].Y;
+                    float Y4 = sprite.hitbox.corners[(j + 1) % corners.Length].Y;
+
+                    float X1 = corners[i].X;
+                    float X2 = corners[(i + 1) % corners.Length].X;
+                    float X3 = sprite.hitbox.corners[j].X;
+                    float X4 = sprite.hitbox.corners[(j + 1) % corners.Length].X;
+
+
+                    float A1 = (Y1 - Y2) / (X1 - X2);
+                    float A2 = (Y3 - Y4) / (X3 - X4);
+                    if (Math.Abs(A1 - A2) <= 1e-5)
+                         continue;
+                    float b1 = Y1 - A1 * X1;
+                    float b2 = Y3 - A2 * X3;
+
+
+                    float Xa = (b2 - b1) / (A1 - A2);
+
+                    if (!((Xa < Math.Max(Math.Min(X1, X2), Math.Min(X3, X4))) ||
+                        (Xa > Math.Min(Math.Max(X1, X2), Math.Max(X3, X4)))))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
+
 
         public void DrawHitbox()
         {
